@@ -1,0 +1,39 @@
+<%-include('partials/header')%>
+<h1>Register Meds.</h1>
+
+<!-- Ik moet nog iets doen met dat als currentlyUsing true 
+    is dat je het niet nog een keer kunt registreren 
+    maar enkel aanpassen-->
+
+<% medicationEjs.forEach(function(medication){%>
+   
+    
+    <form  action="/registerMedication" method="POST">
+        <input type="hidden" name="medication" value="<%=medication%>">
+        <input type="hidden" name="name" value="<%=medication.name%>">
+        <input type="checkbox" name="currentlyUsing" id="<%=medication.name%>">
+        <label for="<%=medication.name%>"><%=medication.name%></label>
+        <input type="number" id="amount" name="amount">
+        <label for="amount"><%=medication.medType%> a <%=medication.timesPer%></label>
+        <input type="hidden" name="timesPer" value="<%=medication.timesPer%>">
+        <label for="dose">Containing</label>
+        <input type="number" id="dose" name="dose">
+        <input type="hidden" name="doseType" value="<%=medication.doseType%>">
+        <label for="dose"><%=medication.doseType%></label>
+        <input type="hidden" name="form" value="<%=medication.medType%>">
+        <button type="submit">Submit</button>
+    </form>
+   
+<%}); %>
+<h2>Currently Using</h2>
+<ul>
+<% medicationUsingEjs.forEach(function(medicationU){%>
+    
+        <li><%=medicationU.medication.name%> using <%=medicationU.frequency.times%> <%=medicationU.medication.medType%> per <%=medicationU.medication.timesPer%> containing <%=medicationU.quantity.amount%> <%=medicationU.quantity.unit%></li>
+   
+    <%}); %>
+</ul>
+
+<button><a href="/manageMedication">Manage Medication</a></button>
+
+<%-include('partials/footer')%>

@@ -1,0 +1,17 @@
+<%-include('partials/header')%>
+<h1>Medication Overview</h1>
+<h2>Currently using active:</h2>
+<ul>
+<%medicationActiveEjs.forEach(function(medication){%>
+<li><%=medication.medication.name%> used <%=medication.quantity.amount%> <%=medication.quantity.unit%> for <%=medication.frequency.times%> <%=medication.form%> per <%=medication.frequency.timesPer%> </li>
+
+<%});%>
+</ul>
+<h2>Currently using preventive:</h2>
+<ul>
+<%medicationPreventiveEjs.forEach(function(medication){%>
+<li><%=medication.medication.name%> using <%=medication.quantity.amount%> <%=medication.quantity.unit%> for <%=medication.frequency.times%> times per <%=medication.frequency.timesPer%> in the form of <%=medication.form%></li>
+
+<%});%>
+</ul>
+<%-include('partials/footer')%>

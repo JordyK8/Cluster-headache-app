@@ -1,0 +1,119 @@
+<%-include('partials/header')%>
+
+<h1>Overview</h1>
+
+<p><%=foundUserAttacksEjs%></p>
+
+<div class="toggle">
+    <form action="/medicationOverviewSelector" method="POST">
+        <select name="month" id="monthSelector">
+
+            <%for(var i = 0; i < 12; i++){%>
+            <%var month = 0;%>
+            <%if(i == 0){%>
+            <%month = "Jan";%>
+            <%}else if(i == 1){%>
+            <%month = "Feb";%>
+            <%}else if(i == 2){%>
+            <%month = "Mar";%>
+            <%}else if(i == 3){%>
+            <%month = "Apr";%>
+            <%}else if(i == 4){%>
+            <%month = "May";%>
+            <%}else if(i == 5){%>
+            <%month = "Jun";%>
+            <%}else if(i == 6){%>
+            <%month = "Jul";%>
+            <%}else if(i == 7){%>
+            <%month = "Aug";%>
+            <%}else if(i ==8){%>
+            <%month = "Sep";%>
+            <%}else if(i == 9){%>
+            <%month = "Okt";%>
+            <%}else if(i == 10){%>
+            <%month = "Nov";%>
+            <%}else{%>
+            <%month = "Dec";%>
+            <%}%>
+            <%if(i != monthEjs){%>
+            <option value="<%=i%>"><%=month%></option>
+            <%}else{%>
+            <option value="<%=i%>" selected><%=month%></option>
+            <%}}%>
+
+        </select>
+        <select name="year" id="year">
+            <%for(var i = 0; i < 200; i++){%>
+            <%var year = 1900 + i;%>
+            <%if (year != yearEjs){%>
+            <option value="<%=year%>"><%=year%></option>
+            <%}else{%>
+            <option value="<%=yearEjs%>" selected><%=yearEjs%></option>
+            <%}};%>
+        </select>
+
+
+        <button type="submit">Search</button>
+    </form>
+    <input type="hidden" id="attacksArray" value="<%=attacksEjs%>"">
+    <%var count = 0;%>
+    <h3 id=" targetH3"></h3>
+    <ul>
+
+        <%attacksEjs.forEach(function(attack){%>
+        <%if(attack.userId === userEjs.googleId){%>
+        <p>found it!</p>
+        <%}%>
+    
+    <%const year = attack.start.getFullYear();%>
+        <%const date = attack.start.getDate();%>
+        <%const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];%>
+        <%const monthIndex = attack.start.getMonth();%>
+        <%const monthName = months[monthIndex];%>
+        <%const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];%>
+        <%const dayName = days[attack.start.getDay()];%>
+        <%const formattedDate = `${dayName}, ${date} ${monthName} ${year}`;%>
+
+
+        <%const diffTime = Math.round(Math.abs(attack.start - attack.end)/60000);%>
+
+
+        <li><%=formattedDate%> duration: <%=diffTime%> minutes - intensity: <%=attack.intensity%>
+            <%attack.medicationUsed.forEach(function(medicationUsed){%>
+            <br>
+            Active medication: <%=medicationUsed.medication.name%> used <%=medicationUsed.frequency.times%>
+            <%=medicationUsed.medication.medType%> for <%=medicationUsed.quantity.amount%>
+            <%=medicationUsed.medication.doseType%>
+            <%});%>
+        </li>
+
+        <%count ++;%>
+        <%});%>
+
+        <p id="targetValue"><%=count%> items found</p>
+    </ul>
+
+
+
+</div>
+<form action="/medicationOverviewSelectorAll" method="POST">
+    <button type="submit">Show all attacks</button>
+</form>
+
+<script>
+    var valuee = $("#targetValue");
+    $("#targetH3").html(valuee);
+
+    // optional button toggler function for a dropdown menu
+    // $('#togglerbtn').click(function(){
+    //     $('.toggle').slideToggle(200, function(){
+    //         if($('.toggle').is(':visible')){
+    //     $('#togglerbtn').text('Hide all attacks');
+    // }else{
+    //     $('#togglerbtn').text('Show all attacks');
+
+    // };
+    //     });
+    // });
+</script>
+<%-include('partials/footer')%>

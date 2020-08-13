@@ -1,0 +1,16 @@
+<%-include('partials/header')%>
+<%if (userEjs != 'undefined' && userEjs.firstName != 'undefined' && userEjs.lastName != 'undefined'){%>
+<h1>Hi <%=userEjs.firstName%> <%=userEjs.lastName%></h1>
+<a href="#"><img src=<%=userEjs.picture[0].value%> alt="" class="profileImg"></a>
+<%}%>
+    <div class="container">
+        <a href="/attack"><button class="btn btn-xl btn-danger">Attack!</button></a>
+    </div>
+    <div class="container">
+        <a href="/overview"><button class="btn btn-xl btn-primary">Overview</button></a>
+    </div>
+    <div class="container">
+        <a href="/medication"><button class="btn btn-xl btn-warning">Medication</button></a>
+    </div>
+    
+    <%-include('partials/footer')%>
