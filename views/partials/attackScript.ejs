@@ -9,4 +9,39 @@ $('#startAttack').click(function(){
     $('#endAttack').show();
 });
 
+
+if(document.getElementById("attackTimer")){
+    var d = new Date();
+    var myVar = setInterval(myTimer, 1000);
+    var sec = 0;
+    var min = 0;
+    var hour = 0;
+    function parseTime(time){
+        if (time < 10){
+            return '0' + time;
+        }else{
+        return time;
+        }
+    }
+    function myTimer() {
+    if (sec === 59){
+        sec = 0;
+        if (min === 59){
+            min = 0;
+            hour++;
+        }
+        else{
+         min++;
+        }
+        }
+    else{
+     sec ++;
+         }
+      
+      document.getElementById("attackTimer").innerHTML = parseTime(hour) + ':' + parseTime(min) + ':' + parseTime(sec);
+    }
+} else{
+    console.log("no timer started");
+}
+    
 </script>

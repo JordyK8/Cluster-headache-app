@@ -63,7 +63,6 @@ const medicationUsageSchema = new mongoose.Schema({
     },
     currentlyUsing: Boolean
 });
-
 const attackSchema = new mongoose.Schema({
     start: Date,
     end: Date,
@@ -176,7 +175,8 @@ app.get('/attack', (req, res) => {
             attackMomentEjs: '',
             displayStyleEjs: "none",
             activeMedsEjs: [""],
-            userEjs: user
+            userEjs: user,
+            status: "opened"
         });
 
 
@@ -199,7 +199,8 @@ app.post('/attackStart', (req, res) => {
         attackButtonEjs: attackButton,
         attackMomentEjs: attackMoment,
         displayStyleEjs: "none",
-        activeMedsEjs: [""]
+        activeMedsEjs: [""],
+        status: "started"
     });
 });
 
@@ -227,7 +228,8 @@ app.post('/attackEnd', (req, res) => {
             attackButtonEjs: attackButton,
             attackMomentEjs: attackMoment,
             displayStyleEjs: "",
-            activeMedsEjs: meds
+            activeMedsEjs: meds,
+            status: "ended"
         });
     });
 });

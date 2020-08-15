@@ -1,16 +1,30 @@
 <%-include('partials/header')%>
-<h1>attack</h1>
+<div class="page-top-contianer"><h1>Headache Attack</h1>
+    <%if(status === "started"){%>
+    <p id="attackTimer"></p>
+
+        <%}%>
+    </div>
+
+
+
+
+
 <form action="/attack<%=attackButtonEjs%>" method="POST">
     <input type="hidden" name="attackMoment" value="<%Date()%>">
     <input type="hidden" name="attackEnd" value="<%Date()%>">
     <input type="hidden" name="attackStartMoment" value="<%=attackMomentEjs%>">
-<button id="<%=attackButtonEjs%>attackButton" class="btn btn-xl <%=attackButtonEjs%>" type="submit">Attack <%=attackButtonEjs%></button>
+    <div class="attack-container">
+<button id="<%=attackButtonEjs%>attackButton" class="btn attack-btn <%=attackButtonEjs%>" type="submit">Attack <%=attackButtonEjs%></button>
+
 </form>
-<div style="display: <%=displayStyleEjs%>;">
-<form action="/attackInfo" method="POST">
+
+<div style="display: <%=displayStyleEjs%>">
+<form action="/attackInfo" method="POST" style="margin-top: 100px">
     <label for="intensityAttack">Intensity</label>
-    <input type="hidden" name="attackStartMoment" value="<%=attackMomentEjs%>">
-<select name="intensity" id="intensityAttack">
+    <input class="form-control" type="hidden" name="attackStartMoment" value="<%=attackMomentEjs%>">
+<select class="form-control" name="intensity" id="intensityAttack">
+    <option selected value="0"> Select pain intensity</option>
     <option value="1">1</option>
     <option value="2">2</option>
     <option value="3">3</option>
@@ -22,14 +36,14 @@
     
    
     <input type="hidden" name="name" value="<%=medication.name%>">
-    <input type="checkbox" name="currentlyUsing" value="<%=medication.name%>">
+    <input type="checkbox" class="form-check-input" name="currentlyUsing" value="<%=medication.name%>">
     <label for="<%=medication.name%>"><%=medication.name%></label>
-    <input type="number" id="amount" name="amount">
-    <label for="amount"><%=medication.medType%> a <%=medication.timesPer%></label>
+    <input class="form-control" type="number" id="amount" name="amount" placeholder="Input amount of <%=medication.medType%>">
+    <label for="amount"><%=medication.medType%> per <%=medication.timesPer%></label>
     <input type="hidden" name="timesPer" value="<%=medication.timesPer%>">
     <label for="dose">Containing</label>
-    <input type="number" id="dose" name="dose">
-    <input type="hidden" name="doseType" value="<%=medication.doseType%>">
+    <input class="form-control" type="number" id="dose" name="dose" placeholder="Input the <%=medication.doseType%>">
+    <input type="hidden" name="doseType" value="<%=medication.doseType%>" >
     <label for="dose"><%=medication.doseType%></label>
     <input type="hidden" name="form" value="<%=medication.medType%>">
     <br>
@@ -37,17 +51,20 @@
 
 
 <%}); %>
+   
+       
+   
 
 
 
-
-<button class="btn btn-lg" type="submit">Submit</button>
+<button class="btn btn-lg attack-btn" type="submit">Submit</button>
 </form>
 
 <br><br>
 
 
 
+</div>
 </div>
 <%-include('partials/attackScript')%>
 <%-include('partials/footer')%>
