@@ -59,16 +59,20 @@ button > a{
 width: 500px;
 height: 100px;
 top: 25%;
-left: 20%;
-margin-left: -150px; /* Negative half of width. */
-
-   
+left: 7%;
 }
-#attackTimer{
+.attack-form{
+    margin-left: 200px;
+    width: 400px;
+}
+   
+
+.attackTimer{
     font-size: 40px;
     top: 100px;
 
 }
+
 .attack-container{
     width: 100vw;
     height: 100vh;
@@ -84,6 +88,7 @@ margin-left: -150px; /* Negative half of width. */
     max-height: 250px;
     border: 5px solid black;
     border-radius: 30px;
+    font-size: 40px;
 }
 #StartattackButton{
     background-color: red;
