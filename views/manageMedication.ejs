@@ -1,63 +1,69 @@
 <%-include('partials/header')%>
-
-<h1>current medication</h1>
-<%medicationEjs.forEach(function(medication){%>
-    <h3><%=medication.name%></h3>
-    <form action="/deleteMedication" method="POST">
-        <input type="hidden" name="medicationName" value="<%=medication.name%>">
-        <button type="submit">Delete</button>
+<div class="container-fluid">
+    <h1>Current Medication</h1>
+</div>
+<div class="container">
+    <%medicationEjs.forEach(function(medication){%>
+    
+        <form action="/deleteMedication" method="POST" class="form-inline">
+            <h3><%=medication.name%></h3>
+            <input type="hidden" name="medicationName" value="<%=medication.name%>">
+            <button class="btn-med-delete" type="submit">Delete</button>
+        </form>
+    <%});%>
+    <div class="container">
+    <h2>add new medication</h2>
+    <form action="/addNewMedication" method="POST">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name">
+    <br>
+    
+    
+    
+    <label for="timesPer">Times Per Value</label>
+    <select name="timesPer" id="timesPer">
+        <option value="year">year</option>
+        <option value="month">month</option>
+        <option value="week">week</option>
+        <option value="day">day</option>
+        <option value="hour">hour</option>
+        <option value="day">minute</option>
+        <option value="attack">attack</option>
+    </select>
+    <label for="doseType">Dose typer</label>
+    <select name="doseType" id="doseType">
+        <option value="kg">kilogram</option>
+        <option value="l">liter</option>
+        <option value="g">gram</option>
+        <option value="mg">milligram</option>
+        <option value="mcg">microgram</option>
+        <option value="dl">deciliter</option>
+        <option value="ml">milliliter</option>
+        <option value="mcl">microliter</option>
+        <option value="minutes">minutes</option>
+        <option value="hours">hours</option>
+    </select>
+    <label for="medType">Medication form</label>
+    <select name="medType" id="medType">
+        <option value="pill">pills</option>
+        <option value="injection">injections</option>
+        <option value="powder">powder</option>
+        <option value="cup">cups</option>
+        <option value="bottle">bottles</option>
+        <option value="gass">gass</option>
+        <option value="chunk">chunks</option>
+        <option value="can">cans</option>
+        <option value="bar">bars</option>
+        <option value="flow">flow</option>
+        <option value="minutes">minutes</option>
+    </select>
+    <select name="operation" id="operation">
+        <option value="preventive">Preventive</option>
+        <option value="active">Active</option>
+    </select>
+    <button type="submit">submit</button>
     </form>
-<%});%>
-<h2>add new medication</h2>
-<form action="/addNewMedication" method="POST">
-<label for="name">Name</label>
-<input type="text" name="name" id="name">
-<br>
-
-
-
-<label for="timesPer">Times Per Value</label>
-<select name="timesPer" id="timesPer">
-    <option value="year">year</option>
-    <option value="month">month</option>
-    <option value="week">week</option>
-    <option value="day">day</option>
-    <option value="hour">hour</option>
-    <option value="day">minute</option>
-    <option value="attack">attack</option>
-</select>
-<label for="doseType">Dose typer</label>
-<select name="doseType" id="doseType">
-    <option value="kg">kilogram</option>
-    <option value="l">liter</option>
-    <option value="g">gram</option>
-    <option value="mg">milligram</option>
-    <option value="mcg">microgram</option>
-    <option value="dl">deciliter</option>
-    <option value="ml">milliliter</option>
-    <option value="mcl">microliter</option>
-    <option value="minutes">minutes</option>
-    <option value="hours">hours</option>
-</select>
-<label for="medType">Medication form</label>
-<select name="medType" id="medType">
-    <option value="pill">pills</option>
-    <option value="injection">injections</option>
-    <option value="powder">powder</option>
-    <option value="cup">cups</option>
-    <option value="bottle">bottles</option>
-    <option value="gass">gass</option>
-    <option value="chunk">chunks</option>
-    <option value="can">cans</option>
-    <option value="bar">bars</option>
-    <option value="flow">flow</option>
-    <option value="minutes">minutes</option>
-</select>
-<select name="operation" id="operation">
-    <option value="preventive">Preventive</option>
-    <option value="active">Active</option>
-</select>
-<button type="submit">submit</button>
-</form>
+</div>
+</div>
 
 <%-include('partials/footer')%>

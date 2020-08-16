@@ -1,17 +1,33 @@
 <%-include('partials/header')%>
-<h1>Medication Overview</h1>
-<h2>Currently using active:</h2>
-<ul>
-<%medicationActiveEjs.forEach(function(medication){%>
-<li><%=medication.medication.name%> used <%=medication.quantity.amount%> <%=medication.quantity.unit%> for <%=medication.frequency.times%> <%=medication.form%> per <%=medication.frequency.timesPer%> </li>
+<div class="container-fluid">
+    <h1>Medication Overview</h1>
+</div>
+<div class="meds-overview">
 
-<%});%>
-</ul>
-<h2>Currently using preventive:</h2>
+
+<div class="row">
+<div class="col-md-6 col-xs-12 med-col">
+    <h2>Currently using active:</h2>
+    <ul>
+    <%medicationActiveEjs.forEach(function(medication){%>
+    <li><%=medication.medication.name%> used <%=medication.quantity.amount%> <%=medication.quantity.unit%> for <%=medication.frequency.times%> <%=medication.form%> per <%=medication.frequency.timesPer%> </li>
+    
+    <%});%>
+    </ul>
+</div>
+<div class="col-md-6 col-xs-12 med-col">
+    <h2>Currently using preventive:</h2>
 <ul>
 <%medicationPreventiveEjs.forEach(function(medication){%>
 <li><%=medication.medication.name%> using <%=medication.quantity.amount%> <%=medication.quantity.unit%> for <%=medication.frequency.times%> times per <%=medication.frequency.timesPer%> in the form of <%=medication.form%></li>
 
 <%});%>
+</div>
+
+
+</div>
+
+
 </ul>
+</div>
 <%-include('partials/footer')%>

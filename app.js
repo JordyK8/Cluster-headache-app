@@ -648,6 +648,16 @@ app.post('/deleteMedication', (req, res) => {
 
 });
 
+app.post('/stopMedsUsage', (req, res)=>{
+    const name = req.body.name;
+    MedicationUsage.deleteOne({'medication.name': name},(err, med)=>{
+        if(err){
+            console.log(err);
+        }else{
+            res.redirect('/registerMedication');
+        }
+    });
+});
 
 
 

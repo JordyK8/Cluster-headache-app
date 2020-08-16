@@ -1,5 +1,8 @@
 <%-include('partials/header')%>
-<h1>Register Meds.</h1>
+<div class="container-fluid">
+    <h1>Register Meds.</h1>
+</div>
+
 
 <!-- Ik moet nog iets doen met dat als currentlyUsing true 
     is dat je het niet nog een keer kunt registreren 
@@ -25,15 +28,22 @@
     </form>
    
 <%}); %>
-<h2>Currently Using</h2>
+<h2>Currently Using Preventive</h2>
 <ul>
 <% medicationUsingEjs.forEach(function(medicationU){%>
     
         <li><%=medicationU.medication.name%> using <%=medicationU.frequency.times%> <%=medicationU.medication.medType%> per <%=medicationU.medication.timesPer%> containing <%=medicationU.quantity.amount%> <%=medicationU.quantity.unit%></li>
-   
+        <form action="/stopMedsUsage" method="POST">
+            <input type="hidden" name="name" value="<%=medicationU.medication.name%>">
+            <button type="submit">Stop Using</button>
+        </form>
+
     <%}); %>
 </ul>
 
-<a href="/manageMedication"><button>Manage Medication</button></a>
+<div class="container-fluid">
+    <a href="/manageMedication"><button>Manage Medication</button></a>
+
+</div>
 
 <%-include('partials/footer')%>

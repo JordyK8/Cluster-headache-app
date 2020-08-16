@@ -1,15 +1,18 @@
 <%-include('partials/header')%>
-<div class="page-top-contianer"><h1>Headache Attack</h1>
+<div class="container-fluid">
+    <h1>Headache Attack</h1>
+
+<div class="page-top-contianer"></div>
     <%if(status === "started"){%>
         <p>Status: <%=status%></p>
         
-    <p class="attackTimer">Duration: <br><span id="attackTimer"></span></p>
+    <p class="attackTimer">Duration: <span id="attackTimer"></span></p>
     
 
         <%}%>
         <%if(status === "ended"){%>
             <p>Status: <%=status%></p>
-            <p class="attackTimer"><span>Duration: </span><br> <%=attackTimerData%></p>
+            <p class="attackTimer"><span>Duration: </span> <%=attackTimerData%></p>
             
                 <%}%>
     </div>
@@ -48,12 +51,12 @@
     <input type="checkbox" class="form-check-input" name="currentlyUsing" value="<%=medication.name%>">
     <label for="<%=medication.name%>"><%=medication.name%></label>
     <input class="form-control" type="number" id="amount" name="amount" placeholder="Input amount of <%=medication.medType%>">
-    <label for="amount"><%=medication.medType%> per <%=medication.timesPer%></label>
+    
     <input type="hidden" name="timesPer" value="<%=medication.timesPer%>">
-    <label for="dose">Containing</label>
+ 
     <input class="form-control" type="number" id="dose" name="dose" placeholder="Input the <%=medication.doseType%>">
     <input type="hidden" name="doseType" value="<%=medication.doseType%>" >
-    <label for="dose"><%=medication.doseType%></label>
+
     <input type="hidden" name="form" value="<%=medication.medType%>">
     <br>
    
@@ -66,7 +69,7 @@
 
 
 
-<button class="btn btn-lg attack-btn" type="submit">Submit</button>
+<button  type="submit">Submit</button>
 </form>
 
 <br><br>

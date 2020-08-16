@@ -1,12 +1,19 @@
 <%-include('partials/header')%>
-
+<div class="container-fluid">
 <h1>Overview</h1>
+</div>
 
 
 
 <div class="toggle">
-    <form action="/medicationOverviewSelector" method="POST">
-        <select name="month" id="monthSelector">
+    
+   
+            
+    <p>Search options:</p>
+  
+    <form class="form-inline" action="/medicationOverviewSelector" method="POST">
+      
+        <select class="form-control" name="month" id="monthSelector" style="width: 100px;">
 
             <%for(var i = 0; i < 12; i++){%>
             <%var month = 0;%>
@@ -42,7 +49,10 @@
             <%}}%>
 
         </select>
-        <select name="year" id="year">
+  
+   
+   
+        <select class="form-control" name="year" id="year" style="width: 100px;">
             <%for(var i = 0; i < 200; i++){%>
             <%var year = 1900 + i;%>
             <%if (year != yearEjs){%>
@@ -51,14 +61,29 @@
             <option value="<%=yearEjs%>" selected><%=yearEjs%></option>
             <%}};%>
         </select>
+   
+
 
 
         <button type="submit">Search</button>
     </form>
+
     <input type="hidden" id="attacksArray" value="<%=attacksEjs%>"">
     <%var count = 0;%>
     <h3 id=" targetH3"></h3>
-    <ul>
+    
+    <table class="tg">
+        <thead>
+          <tr>
+            <th class="tg-6t3r">Date</th>
+            <th class="tg-0lax">Duration (mins)</th>
+            <th class="tg-0lax">Intensity</th>
+            <th class="tg-0lax">Active medication</th>
+            <th class="tg-0lax">Preventive medication</th>
+
+          </tr>
+        </thead>
+        <tbody>
 
         <%attacksEjs.forEach(function(attack){%>
         <%if(attack.userId === userEjs.googleId){%>
@@ -78,28 +103,51 @@
         <%const diffTime = Math.round(Math.abs(attack.start - attack.end)/60000);%>
 
 
-        <li><%=formattedDate%> duration: <%=diffTime%> minutes - intensity: <%=attack.intensity%>
-            <%attack.medicationUsed.forEach(function(medicationUsed){%>
-            <br>
-            Active medication: <%=medicationUsed.medication.name%> used <%=medicationUsed.frequency.times%>
-            <%=medicationUsed.medication.medType%> for <%=medicationUsed.quantity.amount%>
-            <%=medicationUsed.medication.doseType%>
-            <%});%>
-        </li>
+        
+        
+    
+                <tr>
+                    <td><%=formattedDate%></td> 
+                    <td><%=diffTime%></td> 
+                    <td><%=attack.intensity%></td>
+                    <td>
+                        <%attack.medicationUsed.forEach(function(medicationUsed){%>
+                            <%if(medicationUsed.medication.operation === 'active'){%>
+                               - <%=medicationUsed.medication.name%> <br>
+                               <%}%>
+                           <%});%>
+                    </td>
+                     <td>
+                         <%attack.medicationUsed.forEach(function(medicationUsed){%>
+                         <%if(medicationUsed.medication.operation === 'preventive'){%>
+                            - <%=medicationUsed.medication.name%> <br>
+                            <%}%>
+                        <%});%>
+                    </td>
+                    
+                </tr> 
+    
+    
+    
+    
+    
+            
 
         <%count ++;%>
+        
         <%});%>
-
+    </tbody>
+</table>
         <p id="targetValue"><%=count%> items found</p>
-    </ul>
+    
 
 
 
-</div>
+
 <form action="/overview" method="GET">
     <button type="submit">Show all attacks</button>
 </form>
-
+</div>
 <script>
     var valuee = $("#targetValue");
     $("#targetH3").html(valuee);

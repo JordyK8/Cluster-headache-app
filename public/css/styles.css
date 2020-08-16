@@ -1,38 +1,53 @@
 body {
-    background-color: lightslategray;
+    background-color: #aed8fa;
+    overflow-x: hidden;
+    padding:0;
+    margin:0;
 }
-button{
-   
+/* Nav */
+.navbar-brand{
+    margin-right: 80px;
+}
+
+.row{
+    margin-bottom: 50px;
+}
+button {
+
     min-width: 100px;
     min-height: 40px;
     border: 5px solid black;
     border-radius: 30px;
-    color:black;
+    color: black;
     background-color: white;
-    
-     
-    
+
+
+
 }
-button:hover{
-   color: white;
+
+button:hover {
+    color: white;
     background-color: black;
-     cursor:pointer;
+    cursor: pointer;
 }
-button > a:hover{
+
+button>a:hover {
     text-decoration: none;
     color: white;
-    
+
 }
-button > a{
+
+button>a {
     text-decoration: none;
     color: black;
 }
+
 .initialyHidden {
     display: none;
 }
 
 .container {
-    margin: 50px;
+    margin: 20px;
 }
 
 .btn {
@@ -54,34 +69,42 @@ button > a{
 }
 
 /* Attack page */
-.page-top-contianer{
+.page-top-contianer {
     position: absolute;
-width: 500px;
-height: 100px;
-top: 25%;
-left: 7%;
+    width: 500px;
+    height: 100px;
+    top: 25%;
+    left: 7%;
 }
-.attack-form{
-    margin-left: 200px;
-    width: 400px;
+.page-top-contianer p:nth-child(1){
+    margin-top: 30px;
+    margin-bottom:-15px
 }
-   
 
-.attackTimer{
+.attack-form {
+    text-align: center;
+    margin-top: 150px !important;
+}
+.attack-form > *{
+    margin-top: 5px;
+}
+
+.attackTimer {
     font-size: 40px;
     top: 100px;
 
 }
 
-.attack-container{
+.attack-container {
     width: 100vw;
     height: 100vh;
     display: flex;
     justify-content: center;
+    margin-top:-150px;
 
 }
 
-.attack-btn{
+.attack-btn {
     width: 50%;
     max-width: 500px;
     height: 25%;
@@ -90,9 +113,104 @@ left: 7%;
     border-radius: 30px;
     font-size: 40px;
 }
-#StartattackButton{
+
+#StartattackButton {
     background-color: red;
 }
-#EndattackButton{
+
+#EndattackButton {
     background-color: green;
 }
+
+/* Home page */
+.message-container {
+    border-radius: 5px;
+    margin: 20px;
+    padding: 10px;
+
+    background-color: white;
+    height: 800 px;
+    width: 500 px;
+}
+
+
+/* Overview page */
+.toggle {
+    padding: 20px;
+    text-align: center;
+}
+
+.form-inline {  
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+  }
+  
+  .form-inline label {
+    margin: 5px 10px 5px 0;
+  }
+  
+  .form-inline input {
+    vertical-align: middle;
+    margin: 5px 10px 5px 0;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+  }
+  
+
+  
+ 
+  
+ 
+
+table{
+    border: 2px solid black;
+    border-radius: 5px;
+    margin: 0 auto;
+
+}
+th{
+    padding: 5px;
+    padding-right: 30px;
+    padding-left: 30px;
+    text-align: left;
+    border: 1px solid black;
+}
+tr{
+    padding: 5px;
+    border: 1px solid black;
+
+}
+td{
+    border: 1px solid black;
+    padding: 5px;
+    text-align: left;
+    padding-right: 30px;
+    padding-left: 30px;
+
+}
+td:nth-child(2),td:nth-child(3){
+    text-align: center;
+}
+.container-fluid{
+   text-align: center;
+
+}
+.container-fluid h1{
+    padding: 50px;
+ 
+ }
+ /* medsusage overview page */
+ .meds-overview{
+     margin: 25px;
+ }
+ .med-col{
+     border: 2px solid black;
+
+ }
+/* Meds manage page */
+ .btn-med-delete{
+     position: absolute;
+     left: 250px;
+ }
