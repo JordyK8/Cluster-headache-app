@@ -1,9 +1,17 @@
 <%-include('partials/header')%>
 <div class="page-top-contianer"><h1>Headache Attack</h1>
     <%if(status === "started"){%>
-    <p id="attackTimer"></p>
+        <p>Status: <%=status%></p>
+        
+    <p class="attackTimer">Duration: <br><span id="attackTimer"></span></p>
+    
 
         <%}%>
+        <%if(status === "ended"){%>
+            <p>Status: <%=status%></p>
+            <p class="attackTimer"><span>Duration: </span><br> <%=attackTimerData%></p>
+            
+                <%}%>
     </div>
 
 
@@ -14,13 +22,14 @@
     <input type="hidden" name="attackMoment" value="<%Date()%>">
     <input type="hidden" name="attackEnd" value="<%Date()%>">
     <input type="hidden" name="attackStartMoment" value="<%=attackMomentEjs%>">
+    <input type="hidden" name="timer" value="00:00:00" id="attackTimerData">
     <div class="attack-container">
 <button id="<%=attackButtonEjs%>attackButton" class="btn attack-btn <%=attackButtonEjs%>" type="submit">Attack <%=attackButtonEjs%></button>
 
 </form>
 
 <div style="display: <%=displayStyleEjs%>">
-<form action="/attackInfo" method="POST" style="margin-top: 100px">
+<form class="attack-form"  action="/attackInfo" method="POST" style="margin-top: 100px">
     <label for="intensityAttack">Intensity</label>
     <input class="form-control" type="hidden" name="attackStartMoment" value="<%=attackMomentEjs%>">
 <select class="form-control" name="intensity" id="intensityAttack">

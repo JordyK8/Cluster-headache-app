@@ -39,6 +39,7 @@ if(document.getElementById("attackTimer")){
          }
       
       document.getElementById("attackTimer").innerHTML = parseTime(hour) + ':' + parseTime(min) + ':' + parseTime(sec);
+      document.getElementById("attackTimerData").value = parseTime(hour) + ':' + parseTime(min) + ':' + parseTime(sec);
     }
 } else{
     console.log("no timer started");

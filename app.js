@@ -80,6 +80,10 @@ const userSchema = new mongoose.Schema({
     facebookId: String,
     secret: String,
     picture: Array,
+    //ATM the attacks are saved and withdrawn from the Attacks entity and not through User. 
+    // It is more efficient to go through user but for now we leave it as is 
+    // until there is more time to switch it around. 
+    // Preferably at version 2.0
     attacks: [attackSchema]
 });
 
@@ -205,6 +209,7 @@ app.post('/attackStart', (req, res) => {
 });
 
 app.post('/attackEnd', (req, res) => {
+    const attackTimerData = req.body.timer;
     Medication.find({
         operation: 'active'
     }, (err, meds) => {
@@ -229,7 +234,8 @@ app.post('/attackEnd', (req, res) => {
             attackMomentEjs: attackMoment,
             displayStyleEjs: "",
             activeMedsEjs: meds,
-            status: "ended"
+            status: "ended",
+            attackTimerData: attackTimerData
         });
     });
 });
@@ -414,10 +420,8 @@ app.get('/overview', (req, res) => {
         res.redirect("/login");
     }
 });
-
-
 app.post('/medicationOverviewSelector', (req, res) => {
-
+    
     Attack.find({}, (err, attacks) => {
 
         User.find({
@@ -447,18 +451,38 @@ app.post('/medicationOverviewSelector', (req, res) => {
     });
 });
 
-app.post('/medicationOverviewSelectorAll', (req, res) => {
-    Attack.find({}, (err, attacks) => {
-        const date = new Date();
-        const month = date.getMonth();
-        const year = date.getFullYear();
-        res.render('overview', {
-            attacksEjs: attacks,
-            monthEjs: month,
-            yearEjs: year
-        });
-    });
-});
+// app.post('/medicationOverviewSelector', (req, res) => {
+
+//     Attack.find({}, (err, attacks) => {
+
+//         User.find({
+//             googleId: req.user.googleId
+//         }, (err, user) => {
+//             const year = req.body.year;
+//             const month = req.body.month;
+//             const userAttacks = user.attacks;
+//             var searchedAttackList = attacks.filter(function (attack) {
+//                 return attack.start.getMonth() == month;
+
+//             });
+//             var searchedAttackListTwo = searchedAttackList.filter(function (attack) {
+//                 return attack.start.getFullYear() == year;
+
+//             });
+
+
+//             res.render('overview', {
+//                 attacksEjs: searchedAttackListTwo,
+//                 monthEjs: month,
+//                 yearEjs: year,
+//                 userEjs: user,
+//                 foundUserAttacksEjs: userAttacks
+//             });
+//         });
+//     });
+// });
+
+
 
 // Medication Routes
 app.get('/medication', (req, res) => {
