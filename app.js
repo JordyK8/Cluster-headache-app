@@ -27,13 +27,16 @@ app.use(express.urlencoded({
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 60000
+    }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb://localhost:27017/headAcheDB', {
+mongoose.connect(process.env.MONGODB_SERVER, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
     useCreateIndex: true,
