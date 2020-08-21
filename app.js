@@ -88,10 +88,19 @@ const userSchema = new mongoose.Schema({
     // Preferably at version 2.0
     attacks: [attackSchema]
 });
+const messageSchema = new mongoose.Schema({
+    title: String,
+    message: String,
+    publication: {
+        date: Date,
+        user: String
+    }
+});
 
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
 
+const Message = new mongoose.model("Message", messageSchema);
 const User = new mongoose.model("User", userSchema);
 const Attack = new mongoose.model('Attack', attackSchema);
 const Medication = new mongoose.model('Medication', medicationSchema);
@@ -157,17 +166,21 @@ app.get("/register", function (req, res) {
 });
 
 app.get('/', (req, res) => {
+    Message.find({},(err, messages)=>{
+        
+  
     
     if (req.user != null) {
         const user = req.user;
 
         res.render('home', {
+            messagesEjs: messages,
             userEjs: user
         });
     } else {
         res.redirect("/login");
     }
-
+});
 });
 
 
@@ -629,7 +642,23 @@ app.post('/stopMedsUsage', (req, res)=>{
     });
 });
 
+app.post('/messagePost', (req, res)=>{
+    const message = req.body.message;
+    const title = req.body.title;
+    const date = new Date();
+    
+    const newMessage = new Message({
+        title,
+        message,
+    publication: {
+        date,
+        user: 'Admin'
+    }
+    });
+    newMessage.save();
+    res.redirect('/');
 
+});
 
 app.listen(3000, () => {
     console.log("server started on port 3000");
