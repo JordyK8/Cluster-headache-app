@@ -34,6 +34,16 @@
                 <li>Lorum</li>
             </ul>
         </div>
+        <%if(userEjs){%>
+            <%if(userEjs.admin){%>
+            <div>
+                <form action="/messagePost" method="POST">
+                <input type="text" name="title">
+                <input type="textbox" name="message">
+            </form>
+        </div>
+        <%}%>
+    <%}%>
     </div>
 
 </div>

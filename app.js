@@ -13,10 +13,10 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
 
-var http = require("http")
-const server = http.createServer(app)
-const socketio = require('socket.io')
-const io = socketio(server)
+var http = require("http");
+const server = http.createServer(app);
+const socketio = require('socket.io');
+const io = socketio(server);
 
 app.set("view engine", "ejs");
 app.use(express.json());
@@ -28,9 +28,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        maxAge: 60000
-    }
+
 }));
 
 app.use(passport.initialize());
@@ -83,6 +81,7 @@ const userSchema = new mongoose.Schema({
     facebookId: String,
     secret: String,
     picture: Array,
+    admin: { type: Boolean, default: false },
     //ATM the attacks are saved and withdrawn from the Attacks entity and not through User. 
     // It is more efficient to go through user but for now we leave it as is 
     // until there is more time to switch it around. 
@@ -158,9 +157,9 @@ app.get("/register", function (req, res) {
 });
 
 app.get('/', (req, res) => {
-
+    
     if (req.user != null) {
-        user = req.user;
+        const user = req.user;
 
         res.render('home', {
             userEjs: user
@@ -408,7 +407,7 @@ app.get('/overview', (req, res) => {
             User.find({
                 googleId: req.user.googleId
             }, (err, foundUser) => {
-                console.log(foundUser);
+
                 const foundUserAttacks = foundUser.attacks;
                 res.render('overview', {
                     attacksEjs: attacks,
@@ -453,38 +452,6 @@ app.post('/medicationOverviewSelector', (req, res) => {
         });
     });
 });
-
-// app.post('/medicationOverviewSelector', (req, res) => {
-
-//     Attack.find({}, (err, attacks) => {
-
-//         User.find({
-//             googleId: req.user.googleId
-//         }, (err, user) => {
-//             const year = req.body.year;
-//             const month = req.body.month;
-//             const userAttacks = user.attacks;
-//             var searchedAttackList = attacks.filter(function (attack) {
-//                 return attack.start.getMonth() == month;
-
-//             });
-//             var searchedAttackListTwo = searchedAttackList.filter(function (attack) {
-//                 return attack.start.getFullYear() == year;
-
-//             });
-
-
-//             res.render('overview', {
-//                 attacksEjs: searchedAttackListTwo,
-//                 monthEjs: month,
-//                 yearEjs: year,
-//                 userEjs: user,
-//                 foundUserAttacksEjs: userAttacks
-//             });
-//         });
-//     });
-// });
-
 
 
 // Medication Routes
@@ -560,7 +527,7 @@ app.post('/registerMedication', (req, res) => {
     Medication.findOne({
         name: name
     }, (err, medication) => {
-        console.log(medication);
+        
 
         const times = req.body.amount;
         const timesPer = req.body.timesPer;
