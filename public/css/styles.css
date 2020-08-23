@@ -13,7 +13,7 @@ body {
     margin-bottom: 50px;
 }
 button {
-
+    margin: 10px;
     min-width: 100px;
     min-height: 40px;
     border: 5px solid black;
@@ -122,16 +122,6 @@ button>a {
     background-color: green;
 }
 
-/* Home page */
-.message-container {
-    border-radius: 5px;
-    margin: 20px;
-    padding: 10px;
-
-    background-color: white;
-    height: 800 px;
-    width: 500 px;
-}
 
 
 /* Overview page */
@@ -214,3 +204,23 @@ td:nth-child(2),td:nth-child(3){
      position: absolute;
      left: 250px;
  }
+
+ /*Homepage*/
+ .messageArea{
+    border-radius: 5px;
+    margin: 20px;
+    padding: 10px;
+    overflow: scroll;
+    background-color: white;
+    height: 500 px;
+    width: 500 px;
+
+ }
+ .messageContainer{
+     padding: 10px;
+     border: 2px solid rgb(143, 199, 59);
+    background:rgba(173, 239, 75, 0.42);
+    border-radius: 5px;
+    
+ }
+ 
