@@ -12,11 +12,17 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
+const curday = function(){
+    const today = new Date();
+    let dd = today.getDate();
+    let mm = today.getMonth();
+    const yyyy = today.getFullYear();
+    if(dd < 10) dd = `0${dd}`;
+    if(mm < 10) mm = `0${mm}`;
+    return(`${dd}/${mm}/${yyyy}`);
+}
+const currentDay = curday();
 
-var http = require("http")
-const server = http.createServer(app)
-const socketio = require('socket.io')
-const io = socketio(server)
 
 app.set("view engine", "ejs");
 app.use(express.json());
@@ -28,9 +34,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        maxAge: 60000
-    }
+
 }));
 
 app.use(passport.initialize());
@@ -83,16 +87,33 @@ const userSchema = new mongoose.Schema({
     facebookId: String,
     secret: String,
     picture: Array,
+    admin: { type: Boolean, default: false },
     //ATM the attacks are saved and withdrawn from the Attacks entity and not through User. 
     // It is more efficient to go through user but for now we leave it as is 
     // until there is more time to switch it around. 
     // Preferably at version 2.0
     attacks: [attackSchema]
 });
+const messageReplySchema = new mongoose.Schema({
+    title: String,
+    message: String,
+    user: String,
+    publicationDate: String
+});
+const homeMessageSchema = new mongoose.Schema({
+    title: String,
+    message: String,
+    publicationDate: String,
+    user: String,
+    replies: [messageReplySchema]
+});
+
 
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
 
+const HomeMessage = new mongoose.model("HomeMessage", homeMessageSchema);
+const MessageReply = new mongoose.model("MessageReply", messageReplySchema);
 const User = new mongoose.model("User", userSchema);
 const Attack = new mongoose.model('Attack', attackSchema);
 const Medication = new mongoose.model('Medication', medicationSchema);
@@ -158,24 +179,28 @@ app.get("/register", function (req, res) {
 });
 
 app.get('/', (req, res) => {
+    HomeMessage.find({},(err, messages)=>{
 
-    if (req.user != null) {
-        user = req.user;
+  
+    
+    if (req.user) {
+        const user = req.user;
 
         res.render('home', {
+            messagesEjs: messages,
             userEjs: user
         });
     } else {
         res.redirect("/login");
     }
-
+});
 });
 
 
 // Attack Registration Routes
 app.get('/attack', (req, res) => {
     if (req.user != null) {
-        user = req.user;
+        const user = req.user;
         let attackButton = 'Start';
         res.render('attack', {
             attackButtonEjs: attackButton,
@@ -226,7 +251,7 @@ app.post('/attackEnd', (req, res) => {
             }
         }, {
             new: true
-        }, (err, attack) => {
+        }, (err) => {
             if (err) {
                 console.log(err);
             }
@@ -311,7 +336,7 @@ app.post('/attackInfo', (req, res) => {
                                         }
                                     }, {
                                         new: true
-                                    }, (err, attackfound) => {
+                                    }, (err) => {
                                         if (err) {
                                             console.log(err);
                                         }
@@ -372,7 +397,7 @@ app.post('/attackInfo', (req, res) => {
                                                 }
                                             }, {
                                                 new: true
-                                            }, (err, userfound) => {
+                                            }, (err) => {
                                                 if (err) {
                                                     console.log(err);
                                                 }
@@ -408,7 +433,7 @@ app.get('/overview', (req, res) => {
             User.find({
                 googleId: req.user.googleId
             }, (err, foundUser) => {
-                console.log(foundUser);
+
                 const foundUserAttacks = foundUser.attacks;
                 res.render('overview', {
                     attacksEjs: attacks,
@@ -433,12 +458,12 @@ app.post('/medicationOverviewSelector', (req, res) => {
             const year = req.body.year;
             const month = req.body.month;
             const userAttacks = user.attacks;
-            var searchedAttackList = attacks.filter(function (attack) {
-                return attack.start.getMonth() == month;
+            const searchedAttackList = attacks.filter(function (attack) {
+                return attack.start.getMonth() === month;
 
             });
-            var searchedAttackListTwo = searchedAttackList.filter(function (attack) {
-                return attack.start.getFullYear() == year;
+            const searchedAttackListTwo = searchedAttackList.filter(function (attack) {
+                return attack.start.getFullYear() === year;
 
             });
 
@@ -454,43 +479,11 @@ app.post('/medicationOverviewSelector', (req, res) => {
     });
 });
 
-// app.post('/medicationOverviewSelector', (req, res) => {
-
-//     Attack.find({}, (err, attacks) => {
-
-//         User.find({
-//             googleId: req.user.googleId
-//         }, (err, user) => {
-//             const year = req.body.year;
-//             const month = req.body.month;
-//             const userAttacks = user.attacks;
-//             var searchedAttackList = attacks.filter(function (attack) {
-//                 return attack.start.getMonth() == month;
-
-//             });
-//             var searchedAttackListTwo = searchedAttackList.filter(function (attack) {
-//                 return attack.start.getFullYear() == year;
-
-//             });
-
-
-//             res.render('overview', {
-//                 attacksEjs: searchedAttackListTwo,
-//                 monthEjs: month,
-//                 yearEjs: year,
-//                 userEjs: user,
-//                 foundUserAttacksEjs: userAttacks
-//             });
-//         });
-//     });
-// });
-
-
 
 // Medication Routes
 app.get('/medication', (req, res) => {
     if (req.user != null) {
-        user = req.user;
+        const user = req.user;
 
 
         res.render('medication', {
@@ -503,7 +496,7 @@ app.get('/medication', (req, res) => {
 
 app.get('/medicationOverview', (req, res) => {
     if (req.user != null) {
-        user = req.user;
+        const user = req.user;
 
         MedicationUsage.find({
             'medication.operation': "active"
@@ -525,7 +518,7 @@ app.get('/medicationOverview', (req, res) => {
 
 app.get('/registerMedication', (req, res) => {
     if (req.user != null) {
-        user = req.user;
+        const user = req.user;
 
         Medication.find({
             operation: "preventive",
@@ -560,14 +553,14 @@ app.post('/registerMedication', (req, res) => {
     Medication.findOne({
         name: name
     }, (err, medication) => {
-        console.log(medication);
+        
 
         const times = req.body.amount;
         const timesPer = req.body.timesPer;
         const form = req.body.form;
         const amount = req.body.dose;
         const unit = req.body.doseType;
-        if (req.body.currentlyUsing == 'on') {
+        if (req.body.currentlyUsing === 'on') {
             medication.currentlyUsing = true;
             medication.save();
             const currentlyUsing = true;
@@ -588,9 +581,7 @@ app.post('/registerMedication', (req, res) => {
             res.redirect('/registerMedication');
 
 
-        } else {
-            const currentlyUsing = false;
-        }
+        } 
     });
 });
 
@@ -601,7 +592,7 @@ app.post('/registerMedication', (req, res) => {
 
 app.get('/manageMedication', (req, res) => {
     if (req.user != null) {
-        user = req.user;
+        const user = req.user;
 
         Medication.find({}, function (err, meds) {
             res.render('manageMedication', {
@@ -641,7 +632,7 @@ app.post('/deleteMedication', (req, res) => {
 
     Medication.deleteOne({
         name: req.body.medicationName
-    }, function (err, result) {
+    }, function (err) {
         if (err) {
             console.log(err);
         } else {
@@ -653,7 +644,7 @@ app.post('/deleteMedication', (req, res) => {
 
 app.post('/stopMedsUsage', (req, res)=>{
     const name = req.body.name;
-    MedicationUsage.deleteOne({'medication.name': name},(err, med)=>{
+    MedicationUsage.deleteOne({'medication.name': name},(err)=>{
         if(err){
             console.log(err);
         }else{
@@ -662,7 +653,56 @@ app.post('/stopMedsUsage', (req, res)=>{
     });
 });
 
+app.post('/messagePost', (req, res)=>{
+    const user = `${req.user.firstName} ${req.user.familyName}`;
+    const message = req.body.message;
+    const title = req.body.title;
+    const date = currentDay;
+    
+    const newMessage = new HomeMessage({
+        title,
+        message,
+        user,
+    publicationDate: date
+    });
+    newMessage.save();
+    res.redirect('/');
 
+});
+
+app.post('/replyPost', (req, res)=>{
+    const message = req.body.message;
+    const title = req.body.title;
+    const date = currentDay;
+    const id = req.body.id;
+    const user = `${req.user.firstName} ${req.user.familyName}`;
+    
+    const newReply = new MessageReply({
+        title,
+        message,
+        user,
+        publicationDate: date
+    
+    });
+    newReply.save();
+    HomeMessage.findOneAndUpdate({
+        _id:id
+    }, {
+        $push: {
+            replies: newReply
+        }
+    }, {
+        new: true
+    }, (err) => {
+        if (err) {
+            console.log(err);
+        }
+
+    });
+    
+    res.redirect('/');
+
+});
 
 app.listen(3000, () => {
     console.log("server started on port 3000");

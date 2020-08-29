@@ -21,19 +21,50 @@
         </div>
     </div>
     <div class="col-lg-9 col-md-9 col-sm-8 col-xs-12">
-        <div class="message-container">
+        <div class="messageArea">
             <h2>The is the message area - <br> feature will be added in next relesase</h2>
-            <ul>
-                <li>Lorum</li>
-                <li>Lorum</li>
-                <li>Lorum</li>
-                <li>Lorum</li>
-                <li>Lorum</li>
-                <li>Lorum</li>
-                <li>Lorum</li>
-                <li>Lorum</li>
-            </ul>
+            <%messagesEjs.forEach(function(message){%>
+                <div>
+                <h2><%=message.title%></h2>
+                <p><%=message.message%></p>
+                <span class="date"><%=message.publicationDate%> </span> <span class="name">- <%=message.user%></span>
+                <div class="container">
+                    <%message.replies.forEach(function(reply){%>
+                    <h5><%=reply.title%></h5>
+                    <p><%=reply.message%></p>
+                    
+                <%});%>
+                </div>
+            </div>
+            <div class="messageContainer replyContainer">
+                
+                    <form action="/replyPost" method="POST">
+                        <input type="hidden" name="id" value="<%=message._id%>">
+                        <label for="title">Title</label>
+                    <input class="form-control" type="text" name="title" required>
+                    <label for="message">Message</label>
+                    <input class="form-control" type="textbox" name="message" required>
+                    <button type="submit">submit</button>
+                </form>
+            </div>
+
+            <%})%>
+            
+            
         </div>
+        <%if(userEjs){%>
+            <%if(userEjs.admin){%>
+            <div class="messageContainer container">
+                <form action="/messagePost" method="POST">
+                    <label for="title">Title</label>
+                <input class="form-control" type="text" name="title" required>
+                <label for="message">Message</label>
+                <input class="form-control" type="textbox" name="message" required>
+                <button type="submit">submit</button>
+            </form>
+        </div>
+        <%}%>
+    <%}%>
     </div>
 
 </div>
