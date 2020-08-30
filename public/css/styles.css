@@ -144,8 +144,7 @@ button>a {
 }
 
 .form-inline {  
-    display: flex;
-    flex-flow: row wrap;
+   
     align-items: center;
   }
   
@@ -223,11 +222,12 @@ td:nth-child(2),td:nth-child(3){
 
  /*Homepage*/
  .messageArea{
-    border-radius: 5px;
+    border-radius: 10px;
+    
     margin: 20px;
     padding: 10px;
     overflow: scroll;
-    background-color: white;
+    background-color: rgb(253, 218, 218);
     height: 500 px;
     width: 500 px;
 
@@ -250,4 +250,6 @@ td:nth-child(2),td:nth-child(3){
      font-weight: 800;
  }
 
- 
+ .centered-container{
+     margin: auto;
+ }
