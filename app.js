@@ -12,7 +12,16 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
-
+const curday = function(){
+    const today = new Date();
+    let dd = today.getDate();
+    let mm = today.getMonth();
+    const yyyy = today.getFullYear();
+    if(dd < 10) dd = `0${dd}`;
+    if(mm < 10) mm = `0${mm}`;
+    return(`${dd}/${mm}/${yyyy}`);
+}
+const currentDay = curday();
 
 
 app.set("view engine", "ejs");
@@ -92,12 +101,12 @@ const messageReplySchema = new mongoose.Schema({
     title: String,
     message: String,
     user: String,
-    publicationDate: Date
+    publicationDate: String
 });
 const homeMessageSchema = new mongoose.Schema({
     title: String,
     message: String,
-    publicationDate: Date,
+    publicationDate: String,
     user: String,
     replies: [messageReplySchema]
 });
@@ -736,8 +745,13 @@ app.post('/messagePost', (req, res) => {
     const user = `${req.user.firstName} ${req.user.familyName}`;
     const message = req.body.message;
     const title = req.body.title;
+<<<<<<< HEAD
     const date = new Date();
 
+=======
+    const date = currentDay;
+    
+>>>>>>> 37390c997c4c80874d69090389291e63121a84ce
     const newMessage = new HomeMessage({
         title,
         message,
@@ -752,7 +766,7 @@ app.post('/messagePost', (req, res) => {
 app.post('/replyPost', (req, res) => {
     const message = req.body.message;
     const title = req.body.title;
-    const date = new Date();
+    const date = currentDay;
     const id = req.body.id;
     const user = `${req.user.firstName} ${req.user.familyName}`;
 

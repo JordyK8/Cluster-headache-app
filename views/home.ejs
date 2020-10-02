@@ -25,13 +25,14 @@
             <h2>The is the message area - <br> feature will be added in next relesase</h2>
             <%messagesEjs.forEach(function(message){%>
                 <div>
-                <h2><%=message.title%></h2><span><%=message.publicationDate%> <%=message.user%> <%=message.user%></span>
+                <h2><%=message.title%></h2>
                 <p><%=message.message%></p>
+                <span class="date"><%=message.publicationDate%> </span> <span class="name">- <%=message.user%></span>
                 <div class="container">
                     <%message.replies.forEach(function(reply){%>
                     <h5><%=reply.title%></h5>
                     <p><%=reply.message%></p>
-
+                    
                 <%});%>
                 </div>
             </div>
