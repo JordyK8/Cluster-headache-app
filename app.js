@@ -12,16 +12,7 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
-const curday = function(){
-    const today = new Date();
-    let dd = today.getDate();
-    let mm = today.getMonth();
-    const yyyy = today.getFullYear();
-    if(dd < 10) dd = `0${dd}`;
-    if(mm < 10) mm = `0${mm}`;
-    return(`${dd}/${mm}/${yyyy}`);
-}
-const currentDay = curday();
+
 
 
 app.set("view engine", "ejs");
@@ -101,12 +92,12 @@ const messageReplySchema = new mongoose.Schema({
     title: String,
     message: String,
     user: String,
-    publicationDate: String
+    publicationDate: Date
 });
 const homeMessageSchema = new mongoose.Schema({
     title: String,
     message: String,
-    publicationDate: String,
+    publicationDate: Date,
     user: String,
     replies: [messageReplySchema]
 });
@@ -212,6 +203,7 @@ app.get('/attack', (req, res) => {
             attackMomentEjs: '',
             displayStyleEjs: "none",
             activeMedsEjs: [""],
+            preventiveMedsEjs: [""],
             userEjs: user,
             status: "opened"
         });
@@ -237,18 +229,16 @@ app.post('/attackStart', (req, res) => {
         attackMomentEjs: attackMoment,
         displayStyleEjs: "none",
         activeMedsEjs: [""],
+        preventiveMedsEjs: [""],
         status: "started"
     });
 });
 
 app.post('/attackEnd', (req, res) => {
+    let attackButton = "hidden";
+    let attackMoment = req.body.attackStartMoment;
     const attackTimerData = req.body.timer;
-    Medication.find({
-        operation: 'active'
-    }, (err, meds) => {
-        let attackButton = "hidden";
-        let attackMoment = req.body.attackStartMoment;
-        Attack.findOneAndUpdate({
+    const findAndUpdateAttackEnd = Attack.findOneAndUpdate({
             start: attackMoment
         }, {
             $set: {
@@ -256,26 +246,39 @@ app.post('/attackEnd', (req, res) => {
             }
         }, {
             new: true
-        }, (err) => {
-            if (err) {
-                console.log(err);
-            }
         });
-
-        res.render('attack', {
-            attackButtonEjs: attackButton,
-            attackMomentEjs: attackMoment,
-            displayStyleEjs: "",
-            activeMedsEjs: meds,
-            status: "ended",
-            attackTimerData: attackTimerData
-        });
+    const medicationFindActive = Medication.find({
+        operation: 'active'
     });
+    const medicationFindPreventive = Medication.find({
+        operation: 'preventive'
+    });
+    medicationFindPreventive.then((medsprev)=>{
+        medicationFindActive.then((meds)=>{
+            findAndUpdateAttackEnd.then((attack)=>{
+            res.render('attack', {
+                attackButtonEjs: attackButton,
+                attackMomentEjs: attackMoment,
+                displayStyleEjs: "",
+                activeMedsEjs: meds,
+                preventiveMedsEjs: medsprev,
+                status: "ended",
+                attackTimerData: attackTimerData
+            });
+            }).catch((error)=>{
+                console.log(error);
+            });
+        }).catch((error)=>{
+            console.log(error);
+        });
+    }).catch((error)=>{
+        console.log(error);
+    });
+    
 });
 
-
-
 app.post('/attackInfo', (req, res) => {
+
     let attackStartMoment = req.body.attackStartMoment;
     const findAndUpdateAttackIntensity = Attack.findOneAndUpdate({
         start: attackStartMoment
@@ -287,17 +290,16 @@ app.post('/attackInfo', (req, res) => {
         new: true
     });
     findAndUpdateAttackIntensity.then((attack)=>{
-    let usedMedsArray;
     if (req.body.currentlyUsing) 
     {
-        function getMedInfo(array, data){
-            if (Array.isArray(array)) {
+        function getMedInfo(data){
+            if (Array.isArray(data)) {
                 return data;
             } else {
                 return [data];
             }
         };
-        usedMedsArray = getMedInfo(usedMedsArray, req.body.currentlyUsing);
+        let usedMedsArray = getMedInfo(req.body.currentlyUsing);
         usedMedsArray.forEach(function (currentlyUsing, i) 
         {
                 function returnDataAsArrayOrString(data){
@@ -312,7 +314,7 @@ app.post('/attackInfo', (req, res) => {
                 const findAttackMedication = Medication.findOne({
                     name: currentlyUsing
                 }); 
-                findAttackMedication.then((foundMed)={
+                findAttackMedication.then((foundMed)=>{
                     if (foundMed) {
                         let usingMed = new MedicationUsage({
                             medication: foundMed,
@@ -345,11 +347,46 @@ app.post('/attackInfo', (req, res) => {
                 }).catch((error)=>{
                     console.log(error);
                 });
-            
-
                 });
-                    }
+        }else{}
+        if (req.body.currentlyUsingPrev) 
+    {
+        function getMedInfo(data){
+            if (Array.isArray(data)) {
+                return data;
+            } else {
+                return [data];
             }
+        };
+        let usedMedsArrayPrev = getMedInfo(req.body.currentlyUsingPrev);
+        usedMedsArrayPrev.forEach(function (currentlyUsingPrev, i) 
+        {
+                const findAttackMedication = MedicationUsage.findOne({
+                    'medication.name': currentlyUsingPrev
+                }); 
+                findAttackMedication.then((foundMed)=>{
+                    if (foundMed) {
+                        
+                        attack.medicationUsed.push(foundMed);
+                        const findAndUpdateAttackMedicationUsed = Attack.findOneAndUpdate({
+                            start: attackStartMoment
+                            }, {
+                            $push: {
+                                medicationUsed: foundMed
+                            }
+                            }, {
+                                new: true
+                            });
+                            findAndUpdateAttackMedicationUsed.catch((error)=>{
+                                console.log(error);
+                            });
+                                }
+                }).catch((error)=>{
+                    console.log(error);
+                });
+                });
+        } else{}
+    }
 
     ).catch((error)=>{
         console.log(error);
@@ -745,13 +782,8 @@ app.post('/messagePost', (req, res) => {
     const user = `${req.user.firstName} ${req.user.familyName}`;
     const message = req.body.message;
     const title = req.body.title;
-<<<<<<< HEAD
     const date = new Date();
 
-=======
-    const date = currentDay;
-    
->>>>>>> 37390c997c4c80874d69090389291e63121a84ce
     const newMessage = new HomeMessage({
         title,
         message,
@@ -766,7 +798,7 @@ app.post('/messagePost', (req, res) => {
 app.post('/replyPost', (req, res) => {
     const message = req.body.message;
     const title = req.body.title;
-    const date = currentDay;
+    const date = new Date();
     const id = req.body.id;
     const user = `${req.user.firstName} ${req.user.familyName}`;
 
