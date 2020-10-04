@@ -546,62 +546,53 @@ app.post('/attackInfo', (req, res) => {
 app.get('/overview', (req, res) => {
     if (req.user != null) {
         user = req.user;
-
-        Attack.find({}, (err, attacks) => {
-
-            const date = new Date();
-            const month = date.getMonth();
-            const year = date.getFullYear();
-
-            User.find({
-                googleId: req.user.googleId
-            }, (err, foundUser) => {
-
-                const foundUserAttacks = foundUser.attacks;
-                res.render('overview', {
-                    attacksEjs: attacks,
-                    monthEjs: month,
-                    yearEjs: year,
-                    userEjs: foundUser,
-                    foundUserAttacksEjs: foundUserAttacks
-                });
+        const date = new Date();
+        const month = date.getMonth();
+        const year = date.getFullYear();
+        User.find({
+            googleId: req.user.googleId
+        }, (err, foundUser) => {
+        Attack.find({userId: req.user.googleId}, (err, attacks) => {                
+            res.render('overview', {
+                attacksEjs:attacks ,
+                monthEjs: month,
+                yearEjs: year,
+                userEjs: foundUser
             });
+        });
         });
     } else {
         res.redirect("/login");
     }
 });
 app.post('/medicationOverviewSelector', (req, res) => {
-
-    Attack.find({}, (err, attacks) => {
-
-        User.find({
-            googleId: req.user.googleId
-        }, (err, user) => {
-            const year = req.body.year;
-            const month = req.body.month;
-            const userAttacks = user.attacks;
-            const searchedAttackList = attacks.filter(function (attack) {
-                return attack.start.getMonth() === month;
-
-            });
-            const searchedAttackListTwo = searchedAttackList.filter(function (attack) {
-                return attack.start.getFullYear() === year;
-
-            });
-
-
-            res.render('overview', {
-                attacksEjs: searchedAttackListTwo,
-                monthEjs: month,
-                yearEjs: year,
-                userEjs: user,
-                foundUserAttacksEjs: userAttacks
-            });
+    if (req.user != null) {
+        user = req.user;
+        const month = req.body.month;
+        const year = req.body.year;
+        const foundUser = User.find({googleId: req.user.googleId});
+        const attackList = Attack.find({userId: req.user.googleId});
+        foundUser.then(()=>{
+        attackList.then((attacks)=>{
+        const filteredAttackArray = attacks.filter(function(attack){
+            return attack.start.getFullYear() == year && attack.start.getMonth() == month;  
+        });           
+        res.render('overview', {
+            attacksEjs:filteredAttackArray ,
+            monthEjs: month,
+            yearEjs: year,
+            userEjs: foundUser
         });
-    });
+        }).catch((error)=>{
+            console.log(error);
+        });
+        }).catch((error)=>{
+            console.log(error);
+        });
+    } else {
+        res.redirect("/login");
+    }
 });
-
 
 // Medication Routes
 app.get('/medication', (req, res) => {
@@ -708,11 +699,6 @@ app.post('/registerMedication', (req, res) => {
     });
 });
 
-
-
-
-
-
 app.get('/manageMedication', (req, res) => {
     if (req.user != null) {
         const user = req.user;
@@ -749,7 +735,6 @@ app.post('/addNewMedication', (req, res) => {
     medication.save();
     res.redirect('/registerMedication');
 });
-
 
 app.post('/deleteMedication', (req, res) => {
 
