@@ -59,9 +59,13 @@
 
     <input type="hidden" name="form" value="<%=medication.medType%>">
     <br>
-   
+    
 
 
+<%}); %>
+<% preventiveMedsEjs.forEach(function(medication){%>
+    <h3>Currently using: <%=medication.name%></h3>
+    <input type="hidden" name="currentlyUsingPrev" value="<%=medication.name%>">
 <%}); %>
    
        

@@ -1,5 +1,4 @@
 $(document).ready(){
-    console.log("main.js working");
     $(#startAttack).show();
     $(#endAttack).hide();
 }

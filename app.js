@@ -12,16 +12,7 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
-const curday = function(){
-    const today = new Date();
-    let dd = today.getDate();
-    let mm = today.getMonth();
-    const yyyy = today.getFullYear();
-    if(dd < 10) dd = `0${dd}`;
-    if(mm < 10) mm = `0${mm}`;
-    return(`${dd}/${mm}/${yyyy}`);
-}
-const currentDay = curday();
+
 
 
 app.set("view engine", "ejs");
@@ -87,7 +78,10 @@ const userSchema = new mongoose.Schema({
     facebookId: String,
     secret: String,
     picture: Array,
-    admin: { type: Boolean, default: false },
+    admin: {
+        type: Boolean,
+        default: false
+    },
     //ATM the attacks are saved and withdrawn from the Attacks entity and not through User. 
     // It is more efficient to go through user but for now we leave it as is 
     // until there is more time to switch it around. 
@@ -98,12 +92,12 @@ const messageReplySchema = new mongoose.Schema({
     title: String,
     message: String,
     user: String,
-    publicationDate: String
+    publicationDate: Date
 });
 const homeMessageSchema = new mongoose.Schema({
     title: String,
     message: String,
-    publicationDate: String,
+    publicationDate: Date,
     user: String,
     replies: [messageReplySchema]
 });
@@ -179,22 +173,24 @@ app.get("/register", function (req, res) {
 });
 
 app.get('/', (req, res) => {
-    HomeMessage.find({},(err, messages)=>{
 
-  
-    
-    if (req.user) {
-        const user = req.user;
 
-        res.render('home', {
-            messagesEjs: messages,
-            userEjs: user
-        });
-    } else {
-        res.redirect("/login");
-    }
+    const getMessages = HomeMessage.find({});
+    getMessages.then((result)=>{
+        if (req.user) {
+            const user = req.user;
+            res.render('home', {
+                messagesEjs: result,
+                userEjs: user
+            });
+        } else {
+            res.redirect("/login");
+        }
+    }).catch((error)=>{
+        console.log(error);
+    });
 });
-});
+        
 
 
 // Attack Registration Routes
@@ -207,6 +203,7 @@ app.get('/attack', (req, res) => {
             attackMomentEjs: '',
             displayStyleEjs: "none",
             activeMedsEjs: [""],
+            preventiveMedsEjs: [""],
             userEjs: user,
             status: "opened"
         });
@@ -232,18 +229,16 @@ app.post('/attackStart', (req, res) => {
         attackMomentEjs: attackMoment,
         displayStyleEjs: "none",
         activeMedsEjs: [""],
+        preventiveMedsEjs: [""],
         status: "started"
     });
 });
 
 app.post('/attackEnd', (req, res) => {
+    let attackButton = "hidden";
+    let attackMoment = req.body.attackStartMoment;
     const attackTimerData = req.body.timer;
-    Medication.find({
-        operation: 'active'
-    }, (err, meds) => {
-        let attackButton = "hidden";
-        let attackMoment = req.body.attackStartMoment;
-        Attack.findOneAndUpdate({
+    const findAndUpdateAttackEnd = Attack.findOneAndUpdate({
             start: attackMoment
         }, {
             $set: {
@@ -251,234 +246,166 @@ app.post('/attackEnd', (req, res) => {
             }
         }, {
             new: true
-        }, (err) => {
-            if (err) {
-                console.log(err);
-            }
         });
-
-        res.render('attack', {
-            attackButtonEjs: attackButton,
-            attackMomentEjs: attackMoment,
-            displayStyleEjs: "",
-            activeMedsEjs: meds,
-            status: "ended",
-            attackTimerData: attackTimerData
-        });
+    const medicationFindActive = Medication.find({
+        operation: 'active'
     });
+    const medicationFindPreventive = Medication.find({
+        operation: 'preventive'
+    });
+    medicationFindPreventive.then((medsprev)=>{
+        medicationFindActive.then((meds)=>{
+            findAndUpdateAttackEnd.then((attack)=>{
+            res.render('attack', {
+                attackButtonEjs: attackButton,
+                attackMomentEjs: attackMoment,
+                displayStyleEjs: "",
+                activeMedsEjs: meds,
+                preventiveMedsEjs: medsprev,
+                status: "ended",
+                attackTimerData: attackTimerData
+            });
+            }).catch((error)=>{
+                console.log(error);
+            });
+        }).catch((error)=>{
+            console.log(error);
+        });
+    }).catch((error)=>{
+        console.log(error);
+    });
+    
 });
 
 app.post('/attackInfo', (req, res) => {
-
-
-    let attackStartMoment = req.body.attackStartMoment;
-
-
-    Attack.findOneAndUpdate({
-        start: attackStartMoment
-    }, {
-        $set: {
-            intensity: req.body.intensity
-        }
-    }, {
-        new: true
-    }, (err, attack) => {
-
-        if (err) {
-            console.log(err);
+    returnDataAsArrayOrString = function (data){
+        if (Array.isArray(data)){
+            return data[i];
+        }else{
+            return data;
+        }        
+    };
+    getMedInfo = function (data){
+        if (Array.isArray(data)) {
+            return data;
         } else {
-            let usedMedsArray;
-            if (req.body.currentlyUsing) {
-                usedMedsArray = getMedInfo();
-
-                function getMedInfo() {
-                    let usedMedsArray = req.body.currentlyUsing;
-                    if (Array.isArray(usedMedsArray)) {
-                        return req.body.currentlyUsing;
-                    } else {
-                        return [req.body.currentlyUsing];
-                    }
-                }
-                usedMedsArray.forEach(function (currentlyUsing, i) {
-
-                    if (Array.isArray(req.body.dose)) {
-                        let amount = req.body.amount[i];
-                        let dose = req.body.dose[i];
-                        Medication.findOne({
-                            name: currentlyUsing
-                        }, (err, foundMed) => {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                if (foundMed) {
-                                    let usingMed = new MedicationUsage({
-                                        medication: foundMed,
-                                        frequency: {
-                                            times: amount,
-                                            timesPer: foundMed.timesPer
-                                        },
-                                        form: foundMed.medType,
-                                        quantity: {
-                                            amount: dose,
-                                            unit: foundMed.doseType
-                                        },
-                                        currentlyUsing: true
-                                    });
-
-                                    usingMed.save();
-
-                                    attack.medicationUsed.push(usingMed);
-                                    Attack.findOneAndUpdate({
-                                        start: attackStartMoment
-                                    }, {
-                                        $push: {
-                                            medicationUsed: usingMed
-                                        }
-                                    }, {
-                                        new: true
-                                    }, (err) => {
-                                        if (err) {
-                                            console.log(err);
-                                        }
-                                    });
-                                }
-                            }
-                        });
-
-
-                    } else {
-                        let dose = req.body.dose;
-
-                        let amount = req.body.amount;
-
-
-                        Medication.findOne({
-                            name: currentlyUsing
-                        }, (err, foundMed) => {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                if (foundMed) {
-                                    let usingMed = new MedicationUsage({
-                                        medication: foundMed,
-                                        frequency: {
-                                            times: amount,
-                                            timesPer: foundMed.timesPer
-                                        },
-                                        form: foundMed.medType,
-                                        quantity: {
-                                            amount: dose,
-                                            unit: foundMed.doseType
-                                        },
-                                        currentlyUsing: true
-                                    });
-
-                                    usingMed.save();
-
-                                    attack.medicationUsed.push(usingMed);
-                                    Attack.findOneAndUpdate({
-
-                                        start: attackStartMoment
-                                    }, {
-                                        $push: {
-                                            medicationUsed: usingMed
-                                        }
-                                    }, {
-                                        new: true
-                                    }, (err, attackfound) => {
-                                        if (err) {
-                                            console.log(err);
-                                        } else {
-                                            User.findOneAndUpdate({
-                                                googleId: req.user.googleId
-                                            }, {
-                                                $push: {
-                                                    attacks: attackfound
-                                                }
-                                            }, {
-                                                new: true
-                                            }, (err) => {
-                                                if (err) {
-                                                    console.log(err);
-                                                }
-
-                                            });
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-
-
-                });
-            }
+            return [data];
         }
-    });
-    res.redirect('/');
+    }; 
+    let attackStartMoment = req.body.attackStartMoment;
+    let amount = returnDataAsArrayOrString(req.body.amount);
+    let dose = returnDataAsArrayOrString(req.body.dose);
+    let usedMedsArray = getMedInfo(req.body.currentlyUsing);
+    const findAndUpdateAttackIntensity = Attack.findOneAndUpdate({start: attackStartMoment}, {$set: {intensity: req.body.intensity}}, {new: true});
+    findAndUpdateAttackIntensity.then((attack)=>{
+        usedMedsArray.forEach(function (currentlyUsing, i){
+            const findAttackMedication = Medication.findOne({name: currentlyUsing});
+             findAttackMedication.then((foundMed)=>{
+                    if (foundMed) {
+                        let usingMed = new MedicationUsage({
+                            medication: foundMed,
+                            frequency: {
+                                times: amount,
+                                timesPer: foundMed.timesPer
+                            },
+                            form: foundMed.medType,
+                            quantity: {
+                                amount: dose,
+                                unit: foundMed.doseType
+                            },
+                            currentlyUsing: true
+                        });
+                        usingMed.save();
+                        const findAndUpdateAttackMedicationUsed = Attack.findOneAndUpdate({start: attackStartMoment}, {$push: {    medicationUsed: usingMed}}, {    new: true});
+                        attack.medicationUsed.push(usingMed);
+                        findAndUpdateAttackMedicationUsed.catch((error)=>{console.log(error);});
+                    }
+                }).catch((error)=>{
+                    console.log(error);
+            });
+        });
+        function getMedInfo(data){
+            if (Array.isArray(data)) {
+                return data;
+            } else {
+                return [data];
+            }
+        };
+        let usedMedsArrayPrev = getMedInfo(req.body.currentlyUsingPrev);
+        usedMedsArrayPrev.forEach(function (currentlyUsingPrev, i){ 
+            const findAttackMedicationPrev = Medication.findOne({name: currentlyUsingPrev});
+            
+            findAttackMedicationPrev.then((foundMed)=>{
+                if (foundMed) {
+                    attack.medicationUsed.push(foundMed);
+                    const findAndUpdateAttackMedicationUsedPreventive = Attack.findOneAndUpdate({start: attackStartMoment}, {$push: {    medicationUsed: foundMed}}, {    new: true});
+                    findAndUpdateAttackMedicationUsedPreventive.catch((error)=>{
+                            console.log(error);
+                        });
+                }
+            }).catch((error)=>{
+                console.log(error);
+            });
+            });
+    }).catch((error)=>{
+        console.log(error);
+    }); 
+    res.redirect('/');   
 });
+
 
 
 // Overview Routes
 app.get('/overview', (req, res) => {
     if (req.user != null) {
         user = req.user;
-
-        Attack.find({}, (err, attacks) => {
-
-            const date = new Date();
-            const month = date.getMonth();
-            const year = date.getFullYear();
-
-            User.find({
-                googleId: req.user.googleId
-            }, (err, foundUser) => {
-
-                const foundUserAttacks = foundUser.attacks;
-                res.render('overview', {
-                    attacksEjs: attacks,
-                    monthEjs: month,
-                    yearEjs: year,
-                    userEjs: foundUser,
-                    foundUserAttacksEjs: foundUserAttacks
-                });
+        const date = new Date();
+        const month = date.getMonth();
+        const year = date.getFullYear();
+        User.find({
+            googleId: req.user.googleId
+        }, (err, foundUser) => {
+        Attack.find({userId: req.user.googleId}, (err, attacks) => {                
+            res.render('overview', {
+                attacksEjs:attacks ,
+                monthEjs: month,
+                yearEjs: year,
+                userEjs: foundUser
             });
+        });
         });
     } else {
         res.redirect("/login");
     }
 });
 app.post('/medicationOverviewSelector', (req, res) => {
-    
-    Attack.find({}, (err, attacks) => {
-
-        User.find({
-            googleId: req.user.googleId
-        }, (err, user) => {
-            const year = req.body.year;
-            const month = req.body.month;
-            const userAttacks = user.attacks;
-            const searchedAttackList = attacks.filter(function (attack) {
-                return attack.start.getMonth() === month;
-
-            });
-            const searchedAttackListTwo = searchedAttackList.filter(function (attack) {
-                return attack.start.getFullYear() === year;
-
-            });
-
-
-            res.render('overview', {
-                attacksEjs: searchedAttackListTwo,
-                monthEjs: month,
-                yearEjs: year,
-                userEjs: user,
-                foundUserAttacksEjs: userAttacks
-            });
+    if (req.user != null) {
+        user = req.user;
+        const month = req.body.month;
+        const year = req.body.year;
+        const foundUser = User.find({googleId: req.user.googleId});
+        const attackList = Attack.find({userId: req.user.googleId});
+        foundUser.then(()=>{
+        attackList.then((attacks)=>{
+        const filteredAttackArray = attacks.filter(function(attack){
+            return attack.start.getFullYear() == year && attack.start.getMonth() == month;  
+        });           
+        res.render('overview', {
+            attacksEjs:filteredAttackArray ,
+            monthEjs: month,
+            yearEjs: year,
+            userEjs: foundUser
         });
-    });
+        }).catch((error)=>{
+            console.log(error);
+        });
+        }).catch((error)=>{
+            console.log(error);
+        });
+    } else {
+        res.redirect("/login");
+    }
 });
-
 
 // Medication Routes
 app.get('/medication', (req, res) => {
@@ -553,7 +480,7 @@ app.post('/registerMedication', (req, res) => {
     Medication.findOne({
         name: name
     }, (err, medication) => {
-        
+
 
         const times = req.body.amount;
         const timesPer = req.body.timesPer;
@@ -581,14 +508,9 @@ app.post('/registerMedication', (req, res) => {
             res.redirect('/registerMedication');
 
 
-        } 
+        }
     });
 });
-
-
-
-
-
 
 app.get('/manageMedication', (req, res) => {
     if (req.user != null) {
@@ -627,7 +549,6 @@ app.post('/addNewMedication', (req, res) => {
     res.redirect('/registerMedication');
 });
 
-
 app.post('/deleteMedication', (req, res) => {
 
     Medication.deleteOne({
@@ -642,51 +563,53 @@ app.post('/deleteMedication', (req, res) => {
 
 });
 
-app.post('/stopMedsUsage', (req, res)=>{
+app.post('/stopMedsUsage', (req, res) => {
     const name = req.body.name;
-    MedicationUsage.deleteOne({'medication.name': name},(err)=>{
-        if(err){
+    MedicationUsage.deleteOne({
+        'medication.name': name
+    }, (err) => {
+        if (err) {
             console.log(err);
-        }else{
+        } else {
             res.redirect('/registerMedication');
         }
     });
 });
 
-app.post('/messagePost', (req, res)=>{
+app.post('/messagePost', (req, res) => {
     const user = `${req.user.firstName} ${req.user.familyName}`;
     const message = req.body.message;
     const title = req.body.title;
-    const date = currentDay;
-    
+    const date = new Date();
+
     const newMessage = new HomeMessage({
         title,
         message,
         user,
-    publicationDate: date
+        publicationDate: date
     });
     newMessage.save();
     res.redirect('/');
 
 });
 
-app.post('/replyPost', (req, res)=>{
+app.post('/replyPost', (req, res) => {
     const message = req.body.message;
     const title = req.body.title;
-    const date = currentDay;
+    const date = new Date();
     const id = req.body.id;
     const user = `${req.user.firstName} ${req.user.familyName}`;
-    
+
     const newReply = new MessageReply({
         title,
         message,
         user,
         publicationDate: date
-    
+
     });
     newReply.save();
     HomeMessage.findOneAndUpdate({
-        _id:id
+        _id: id
     }, {
         $push: {
             replies: newReply
@@ -699,7 +622,7 @@ app.post('/replyPost', (req, res)=>{
         }
 
     });
-    
+
     res.redirect('/');
 
 });
